@@ -26,7 +26,7 @@
             stroke: black;
         }
 
-        .graph .group {
+        .graph .current {
             fill: none;
             stroke: black;
             stroke-width: 1.5;
@@ -38,22 +38,16 @@
 
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
-    var flightHeight = 0;
-    var limit = 60 * 1,
-        duration = 750,
-        now = new Date(Date.now() - duration)
+    let flightHeight = 0
+    const limit = 60 * 1, duration = 750
 
-    var width = 500,
-        height = 200
+    let now = new Date(Date.now() - duration)
 
-    var groups = {
-        current: {
+    const width = 500, height = 200
+
+    var current= {
             value: 0,
-            color: 'orange',
-            data: d3.range(limit).map(function() {
-                return 0
-            })
-        }
+            data: d3.range(limit).map(() => {return 0})
     }
 
     var x = d3.time.scale()
@@ -66,12 +60,8 @@
 
     var line = d3.svg.line()
         .interpolate('basis')
-        .x(function(d, i) {
-            return x(now - (limit - 1 - i) * duration)
-        })
-        .y(function(d) {
-            return y(d)
-        })
+        .x(function(d, i) { return x(now - (limit - 1 - i) * duration)})
+        .y(function(d) { return y(d)})
 
     var svg = d3.select('.graph').append('svg')
         .attr('class', 'chart')
@@ -83,24 +73,18 @@
         .attr('transform', 'translate(0,' + height + ')')
         .call(x.axis = d3.svg.axis().scale(x).orient('bottom'))
 
+
     var paths = svg.append('g')
 
-    for (var name in groups) {
-        var group = groups[name]
-        group.path = paths.append('path')
-            .data([group.data])
-            .attr('class', name + ' group')
-            .style('stroke', group.color)
-    }
+    current.path = paths.append('path')
+        .data([current.data])
+        .attr('class', 'current')
+            .style('stroke', 'orange')
 
     function tick() {
         now = new Date()
-
-        for (var name in groups) {
-            var group = groups[name]
-            group.data.push(flightHeight)
-            group.path.attr('d', line)
-        }
+        current.data.push(flightHeight)
+        current.path.attr('d', line)
 
         x.domain([now - (limit - 2) * duration, now - duration])
 
@@ -116,10 +100,7 @@
             .attr('transform', 'translate(' + x(now - (limit - 1) * duration) + ')')
             .each('end', tick)
 
-        for (var name in groups) {
-            var group = groups[name]
-            group.data.shift()
-        }
+            current.data.shift()
     }
     tick()
 </script>
